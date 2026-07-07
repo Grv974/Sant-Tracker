@@ -2,7 +2,7 @@ name: CI & Deploy GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, claude/menstrual-cycle-pwa-1e83lj]
   pull_request:
   workflow_dispatch:
 
@@ -30,12 +30,13 @@ jobs:
       - run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        if: github.event_name == 'push'
         with:
           path: dist
 
   deploy:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    # Déploie depuis main ou la branche par défaut du dépôt (protection de l'environnement github-pages).
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
     needs: quality
     runs-on: ubuntu-latest
     environment:
