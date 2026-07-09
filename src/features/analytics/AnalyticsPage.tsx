@@ -19,6 +19,8 @@ import { useToday } from '@/hooks/useToday';
 import { addDays, diffDays } from '@/domain/dates';
 import { dayOfCycle, findCycleForDate } from '@/domain/cycle';
 import { extractBBTSeries } from '@/domain/bbt';
+import { dayNutrition } from '@/domain/nutrition';
+import { foodsById } from '@/features/nutrition/useNutrition';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { SegmentedControl } from '@/components/ui/SegmentedControl';
 import { EmptyState } from '@/components/ui/misc';
@@ -40,6 +42,7 @@ export default function AnalyticsPage() {
         <h1 className="font-display text-xl font-bold">{t('analytics.title')}</h1>
         <EmptyState title={t('analytics.title')} body={t('analytics.notEnoughData')} />
         <BBTSection />
+        <NutritionByPhaseSection />
       </div>
     );
   }
@@ -66,9 +69,74 @@ export default function AnalyticsPage() {
       <CycleLengthSection cycles={windowed} />
       <BBTSection />
       <SymptomsByPhaseSection />
+      <NutritionByPhaseSection />
       <AccuracySection />
       {data.profile.trackWeight && <WeightSection />}
     </div>
+  );
+}
+
+/** Nutrition par phase (spec V2 §N.3) : score inflammatoire moyen des journées consignées. */
+function NutritionByPhaseSection() {
+  const { t } = useI18n();
+  const state = useDerived();
+  const stats = useMemo(() => {
+    if (!state) return null;
+    const { data, derived } = state;
+    const phases: CyclePhase[] = ['menstrual', 'follicular', 'ovulatory', 'luteal'];
+    const buckets: Record<CyclePhase, number[]> = { menstrual: [], follicular: [], ovulatory: [], luteal: [] };
+    for (const entry of Object.values(data.dailyEntries)) {
+      if (!entry.nutrition?.foods.length) continue;
+      const cycle = findCycleForDate(derived.cycles, entry.date);
+      if (!cycle) continue;
+      const day = dayNutrition(entry.nutrition, foodsById);
+      if (day.score === null) continue;
+      const periodLen = cycle.periodLength ?? 5;
+      const dayN = dayOfCycle(cycle, entry.date);
+      const end = cycle.endDate ?? entry.date;
+      const ovu = cycle.ovulationConfirmed ?? addDays(end, -(derived.stats.luteal - 1));
+      const delta = diffDays(entry.date, ovu);
+      const phase: CyclePhase = dayN <= periodLen ? 'menstrual' : delta < -1 ? 'follicular' : delta <= 1 ? 'ovulatory' : 'luteal';
+      buckets[phase].push(day.score);
+    }
+    const total = phases.reduce((acc, p) => acc + buckets[p].length, 0);
+    return total >= 5 ? phases.map((p) => ({ phase: p, n: buckets[p].length, avg: buckets[p].length ? buckets[p].reduce((a, b) => a + b, 0) / buckets[p].length : null })) : null;
+  }, [state]);
+
+  if (!state) return null;
+  return (
+    <Card>
+      <CardTitle>{t('nutrition.analyticsTitle')}</CardTitle>
+      {!stats ? (
+        <p className="text-sm text-muted">{t('nutrition.analyticsEmpty')}</p>
+      ) : (
+        <>
+          <div className="flex flex-col gap-2">
+            {stats.map(({ phase, n, avg }) => (
+              <div key={phase} className="flex items-center gap-2 text-xs">
+                <span className="w-24 shrink-0 font-medium">{t(`phases.${phase}`)}</span>
+                <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-surface-2" aria-hidden>
+                  <span className="absolute inset-y-0 left-1/2 w-px bg-muted/40" />
+                  {avg !== null && (
+                    <span
+                      className={`absolute inset-y-0 rounded-full ${avg <= 0 ? 'bg-fertile' : 'bg-warning'}`}
+                      style={{
+                        left: avg <= 0 ? `${50 - Math.min(-avg, 5) * 10}%` : '50%',
+                        width: `${Math.min(Math.abs(avg), 5) * 10}%`,
+                      }}
+                    />
+                  )}
+                </div>
+                <span className="w-20 shrink-0 text-right tabular-nums text-muted">
+                  {avg === null ? '—' : `${avg > 0 ? '+' : ''}${avg.toFixed(1)} (${n} j)`}
+                </span>
+              </div>
+            ))}
+          </div>
+          <p className="mt-2 text-xs text-muted">{t('nutrition.analyticsHint')}</p>
+        </>
+      )}
+    </Card>
   );
 }
 

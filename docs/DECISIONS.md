@@ -32,6 +32,41 @@ La stratégie de test (annexe H) demande des e2e Playwright. Le domaine, les don
 
 §8.2 le définit « X jours après la plage prévue sans J1 ». Comme les prédictions sont recalculées en continu, l'arrivée réelle des règles déplace automatiquement l'échéance : la notification n'est émise que si la plage prévue est dépassée sans nouveau J1, ton neutre, sans jamais évoquer une grossesse (§8.3).
 
+## D9 — V2 Nutrition : base d'aliments Ciqual et score inflammatoire
+
+**Valeurs nutritionnelles.** La base (`src/content/nutrition/foods.generated.ts`) est générée par
+`scripts/generate-foods.py` depuis la **Table Ciqual 2025 (ANSES, licence ouverte Etalab)** fournie
+par le propriétaire du projet. Les valeurs sont reprises telles quelles pour 100 g : « - » (non
+renseigné) → `null`, « traces » → `0`, « < seuil » → `null` (on ne stocke jamais une valeur inventée,
+conformément à la règle impérative du livrable). 143 aliments courants sont curés (id, alias,
+catégorie, groupe NOVA vérifiés à la main) ; le livrable fixe une cible de 400–600 aliments pour la
+version finale — le générateur permet d'étendre la liste sans toucher au code applicatif.
+
+**inflammationScore (« règles §N.2.1 »).** La spec détaillée n'étant pas jointe au livrable, les
+règles sont définies et documentées ici : score de base par catégorie (légumes verts/baies/légumineuses
+−4 … ultra-transformés +4) puis ajustements : sucres > 15 g → +1, fibres ≥ 5 g → −1, oméga-3 ≥ 1 g → −1,
+AG saturés > 10 g → +1, sel > 1,5 g → +1, NOVA 4 → +2, borné à [−5, +5]. Les 37 aliments de
+l'échantillon du livrable **conservent leur score éditorial d'origine** (override) pour rester
+cohérents avec les textes. Inspiration conceptuelle DII sans reproduction de la formule propriétaire.
+
+## D10 — V2 Nutrition : seuils du moteur (bande, tendance, micronutriments)
+
+Le livrable définit les types (`Band`, `AdviceTrigger`) sans fixer les seuils. Retenus, documentés
+dans `domain/nutrition.ts` et testés :
+- **Bande du jour** : moyenne pondérée par portions des scores ; ≤ −1 « anti », ≥ +1 « pro », sinon
+  « neutre » ; « unknown » sans saisie. Présentée comme un repère descriptif, jamais un jugement.
+- **Tendance en baisse** (`whenTrendDown`) : moyenne des scores des 7 derniers jours consignés
+  supérieure d'au moins 1 point à celle des 7 précédents, avec ≥ 3 jours consignés de chaque côté.
+- **Micronutriment possiblement bas** (`whenMicronutrientLow`) : sur ≥ 3 jours consignés des
+  7 derniers jours, apport moyen estimé (1 portion ≈ 100 g) < 50 % du repère indicatif ANSES/EFSA.
+  Toujours affiché comme repère descriptif, jamais comme diagnostic de carence.
+
+## D11 — V2 Nutrition : accès à la page
+
+La navigation principale reste à 5 destinations (décision imposée V1 §10.1). La page `/nutrition`
+est accessible depuis les widgets du dashboard (« Nutrition du jour », « Profil hormonal ») et la
+carte alimentation du journal ; la saisie des aliments vit dans le journal, cœur d'usage.
+
 ## D8 — Tendance intégrée à L̂
 
 §4.7 demande d'intégrer une pente « significative » à L̂ sans définir le seuil. Retenu : |pente| ≥ 0,8 j/cycle sur ≥ 4 cycles (une variation plus faible relève du bruit face à σ_min = 1 j). Constante ajustable dans `prediction.config.ts`.

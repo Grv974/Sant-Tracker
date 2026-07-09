@@ -20,6 +20,16 @@ Lunative est une application de suivi du cycle menstruel **100 % locale, privée
 - **Verrouillage optionnel** par code PIN.
 - **fr / en**, thème clair/sombre, unités °C/°F · kg/lb · cm/in, accessibilité WCAG 2.2 AA (clavier, ARIA, contrastes, `prefers-reduced-motion`, cibles ≥ 44 px, double codage couleur+forme).
 
+## 🥗 V2 — Module Nutrition
+
+- **Journal alimentaire** : recherche d'aliments (accent-insensible, alias), portions, sauvegarde automatique.
+- **Base d'aliments Ciqual** : 143 aliments courants avec les valeurs nutritionnelles exactes de la **Table Ciqual 2025 © ANSES** (licence ouverte Etalab), générée par `scripts/generate-foods.py` — extensible sans toucher au code.
+- **Score inflammatoire du jour** : bande descriptive « anti / neutre / pro » (jamais un jugement), pondérée par portions.
+- **Moteur de conseils** déterministe déclenché par phase, profil (SOPK, endométriose, conception, périménopause, post-partum), micronutriment possiblement bas, bande du jour et tendance — chaque conseil avec **niveau de preuve**, note d'incertitude (C/D) et renvoi professionnel pour toute supplémentation.
+- **Focus nutritionnels par phase** (fer + vitamine C pendant les règles, calcium/magnésium en lutéale…), **récits hormonaux** (dashboard « profil hormonal »), **fiches-principes** (assiette anti-inflammatoire, absorption du fer, NOVA, hydratation).
+- **Analyses** : score inflammatoire moyen par phase estimée.
+- **Gouvernance testée en CI** : `validateNutritionContent` fait échouer le build si une source manque, si un item C/D n'a pas de note d'incertitude ou si un aliment suggéré n'existe pas.
+
 ## ⚕️ Limites importantes
 
 Lunative **n'est pas un dispositif médical**, n'établit aucun diagnostic et **n'est pas une méthode de contraception**. Les prédictions sont des estimations statistiques qui peuvent être fausses. En présence de signes d'alerte, consultez un professionnel de santé.

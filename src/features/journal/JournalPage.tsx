@@ -21,6 +21,7 @@ import { ScaleInput } from '@/components/inputs/ScaleInput';
 import { BBTInput } from '@/components/inputs/BBTInput';
 import { CounterInput } from '@/components/inputs/CounterInput';
 import { AutosaveIndicator } from '@/components/cards';
+import { NutritionJournalCard } from '@/features/nutrition/NutritionJournalCard';
 import { formatWeight, kgToLb, lbToKg, roundTo } from '@/domain/units';
 
 export default function JournalPage() {
@@ -241,6 +242,8 @@ export default function JournalPage() {
           <p className="mt-2 text-xs text-muted">{t('journal.stressHint')}</p>
         </Card>
       )}
+
+      {activeCategories.includes('nutrition') && <NutritionJournalCard date={date} entry={entry} />}
 
       {activeCategories.includes('hydration') && (
         <Card>

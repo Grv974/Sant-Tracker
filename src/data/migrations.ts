@@ -1,6 +1,6 @@
 import type { AppData } from '@/types/models';
 import { SCHEMA_VERSION } from '@/constants/app';
-import { defaultDashboardWidgets } from './defaults';
+import { DASHBOARD_WIDGET_IDS, defaultDashboardWidgets } from './defaults';
 
 /**
  * Registre de migrations (§12.5) : chaque migration est pure et transforme
@@ -35,6 +35,32 @@ export const migrations: Record<number, Migration> = {
             ? settings.dashboardWidgets
             : defaultDashboardWidgets(),
       },
+    };
+  },
+
+  /**
+   * v2 → v3 (module Nutrition, spec V2 §N) : ajoute la catégorie de suivi « nutrition »
+   * et les nouveaux widgets de dashboard (« profil hormonal », « nutrition du jour »),
+   * en préservant l'ordre et les choix existants de l'utilisatrice.
+   */
+  2: (data) => {
+    const settings = (data.settings ?? {}) as Record<string, unknown>;
+    const tracked = { ...((settings.trackedCategories ?? {}) as Record<string, { active: boolean; order: number }>) };
+    if (!tracked.nutrition) {
+      const maxOrder = Math.max(0, ...Object.values(tracked).map((c) => c.order));
+      tracked.nutrition = { active: true, order: maxOrder + 1 };
+    }
+    const widgets = Array.isArray(settings.dashboardWidgets)
+      ? [...(settings.dashboardWidgets as { id: string; visible: boolean; order: number }[])]
+      : defaultDashboardWidgets();
+    const present = new Set(widgets.map((w) => w.id));
+    for (const id of DASHBOARD_WIDGET_IDS) {
+      if (!present.has(id)) widgets.push({ id, visible: id !== 'hormonalProfile', order: widgets.length });
+    }
+    return {
+      ...data,
+      schemaVersion: 3,
+      settings: { ...settings, trackedCategories: tracked, dashboardWidgets: widgets },
     };
   },
 };

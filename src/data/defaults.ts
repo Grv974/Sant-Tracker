@@ -15,20 +15,23 @@ export const TRACKING_CATEGORIES = [
   'sleep',
   'stress',
   'hydration',
+  'nutrition',
   'weight',
   'notes',
 ] as const;
 
 export type TrackingCategory = (typeof TRACKING_CATEGORIES)[number];
 
-const DEFAULT_ACTIVE: TrackingCategory[] = ['flow', 'pain', 'mood', 'energy', 'notes'];
+const DEFAULT_ACTIVE: TrackingCategory[] = ['flow', 'pain', 'mood', 'energy', 'nutrition', 'notes'];
 
 export const DASHBOARD_WIDGET_IDS = [
   'cycleRing',
   'nextPeriod',
   'currentPhase',
+  'hormonalProfile',
   'fertileWindow',
   'quickLog',
+  'nutritionToday',
   'recentSymptoms',
   'bbtMini',
   'cycleTrend',

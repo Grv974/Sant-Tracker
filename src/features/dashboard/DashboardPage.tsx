@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardTitle } from '@/components/ui/Card';
 import { EmptyState, Field } from '@/components/ui/misc';
 import { todayISO } from '@/domain/dates';
+import { HormonalProfileWidget, NutritionTodayWidget } from '@/features/nutrition/widgets';
 import {
   AttentionSignalsWidget,
   BBTMiniWidget,
@@ -32,7 +33,9 @@ const WIDGETS: Record<string, ComponentType<WidgetProps>> = {
   cycleRing: CycleRingWidget,
   nextPeriod: NextPeriodWidget,
   currentPhase: CurrentPhaseWidget,
+  hormonalProfile: HormonalProfileWidget,
   fertileWindow: FertileWindowWidget,
+  nutritionToday: NutritionTodayWidget,
   quickLog: QuickLogWidget,
   recentSymptoms: RecentSymptomsWidget,
   bbtMini: BBTMiniWidget,

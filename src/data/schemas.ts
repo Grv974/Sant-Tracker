@@ -73,6 +73,16 @@ export const dailyEntrySchema = z.object({
   hydration: z.number().min(0).max(50).optional(),
   weightKg: z.number().min(20).max(400).optional(),
   pillTaken: z.boolean().optional(),
+  nutrition: z
+    .object({
+      foods: z.array(
+        z.object({
+          foodId: z.string().min(1),
+          servings: z.number().min(0.25).max(20),
+        }),
+      ),
+    })
+    .optional(),
   customValues: z
     .record(z.string(), z.union([z.boolean(), z.number(), z.string(), z.array(z.string())]))
     .optional(),

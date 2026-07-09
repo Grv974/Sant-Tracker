@@ -1,5 +1,7 @@
 /** Modèles de données persistés (§11.2). Dates civiles locales en YYYY-MM-DD, jamais de timestamp UTC pour les jours. */
 
+import type { NutritionLog } from '@/data/food/types';
+
 export type ISODate = string; // "2025-05-14"
 export type ISODateTime = string; // "2025-05-14T07:12:00.000Z"
 export type UUID = string;
@@ -88,6 +90,8 @@ export interface DailyEntry {
   weightKg?: number;
   /** Jour de plaquette / prise de pilule (suivi optionnel, §3.2.4). */
   pillTaken?: boolean;
+  /** Journal alimentaire du jour (module Nutrition V2, §N). */
+  nutrition?: NutritionLog;
   customValues?: Record<string, boolean | number | string | string[]>;
   notes?: string;
   createdAt: ISODateTime;

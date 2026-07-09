@@ -18,6 +18,7 @@ const Calendar = lazy(() => import('@/features/calendar/CalendarPage'));
 const Analytics = lazy(() => import('@/features/analytics/AnalyticsPage'));
 const Settings = lazy(() => import('@/features/settings/SettingsPage'));
 const Onboarding = lazy(() => import('@/features/onboarding/OnboardingPage'));
+const Nutrition = lazy(() => import('@/features/nutrition/NutritionPage'));
 
 function PageFallback() {
   return (
@@ -56,6 +57,7 @@ function Shell() {
             <Route path="/calendar" element={<Calendar />} />
             <Route path="/log/:date?" element={<Journal />} />
             <Route path="/analytics" element={<Analytics />} />
+            <Route path="/nutrition" element={<Nutrition />} />
             <Route path="/settings/*" element={<Settings />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="*" element={<Navigate to="/" replace />} />
